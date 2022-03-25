@@ -1,7 +1,7 @@
-import {expect} from 'chai';
+import {assert} from 'chai';
 
 describe('Answer to the Ultimate Question of Life, the Universe, and Everything', () => {
   it('42', () => {
-    expect(40 + 2).equal(42);
+    assert.equal(40 + 2, 42);
   });
 });

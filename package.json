@@ -1,15 +1,16 @@
 {
   "name": "@vlsergey/react-indexdb-cache",
-  "version": "0.1.5",
-  "description": "Flexible indexdb-backed cache for react application",
+  "version": "0.0.1",
+  "description": "IndexedDb-backed cache for react application",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "scripts": {
     "clean": "rimraf lib/*",
     "build": "cross-env NODE_ENV=production tsc -p ./src/tsconfig-cjs.json && cross-env NODE_ENV=production tsc -p ./src/tsconfig-esm.json",
     "build:watch": "cross-env NODE_ENV=development tsc -w --preserveWatchOutput -p ./src/tsconfig-esm.json",
-    "eslint:check": "eslint src/**/*.ts test/**/*.ts",
-    "eslint:fix": "eslint --fix src/**/*.ts test/**/*.ts",
+    "check": "npm run eslint:fix && npm run build && npm run test",
+    "eslint:check": "eslint --ignore-pattern \"!.eslintrc.js\" .eslintrc.js karma.conf.js src/**/*.ts test/**/*.ts",
+    "eslint:fix": "eslint --ignore-pattern \"!.eslintrc.js\" .eslintrc.js karma.conf.js --fix src/**/*.ts test/**/*.ts",
     "test": "cross-env NODE_ENV=development karma start karma.conf.js --single-run",
     "test:watch": "cross-env NODE_ENV=development karma start karma.conf.js --no-single-run",
     "test:watch:chrome": "cross-env NODE_ENV=development karma start karma.conf.js --no-single-run --browsers Chrome",
@@ -41,5 +42,8 @@
   "nyc": {
     "sourceMap": false,
     "instrument": false
+  },
+  "dependencies": {
+    "@vlsergey/react-indexdb-repo": "^3.0.1"
   }
 }
