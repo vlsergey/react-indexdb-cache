@@ -1,6 +1,6 @@
 {
   "name": "@vlsergey/react-indexdb-cache",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "IndexedDb-backed cache for react application",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
