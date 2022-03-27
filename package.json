@@ -44,6 +44,6 @@
     "instrument": false
   },
   "dependencies": {
-    "@vlsergey/react-indexdb-repo": "^3.0.1"
+    "@vlsergey/react-indexdb-repo": "^3.1.0"
   }
 }

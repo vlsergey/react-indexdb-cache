@@ -16,8 +16,7 @@ module.exports = function (config) {
   /* eslint-disable-next-line */
   config.set({
     files: [
-      'test/globals.ts',
-      'test/**/*Test.ts',
+      'test/**/*Test.ts*',
     ],
 
     webpack: {

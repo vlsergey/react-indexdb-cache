@@ -13,7 +13,7 @@ export default class IndexDbLoader<Key extends IDBValidKey, DbValue, Value> {
 
   private readonly repoPromise: Promise<IndexedDbRepository<Key, Value> | null>;
 
-  constructor (databaseName: string, keyPath : (string & keyof DbValue), {
+  constructor (databaseName: string, cacheKeyPath : (string & keyof DbValue), {
     prepareForDb = (value: Value) => value as unknown as DbValue,
     restoreAfterDb = (flatValue: DbValue) => flatValue as unknown as Value,
     objectStoreName = 'CACHE',
@@ -30,14 +30,14 @@ export default class IndexDbLoader<Key extends IDBValidKey, DbValue, Value> {
         dbOpenRequest.onsuccess = () => {
           console.debug(`Successfully open indexedDB connection for database '${databaseName}'`);
 
-          const repo = new IndexedDbRepositoryImpl<Key, DbValue, Value>(dbOpenRequest.result, objectStoreName, keyPath);
+          const repo = new IndexedDbRepositoryImpl<Key, DbValue, Value>(dbOpenRequest.result, objectStoreName, cacheKeyPath);
           repo.transformAfterIndexDb = restoreAfterDb;
           repo.transformBeforeIndexDb = prepareForDb;
           resolve(repo);
         };
         dbOpenRequest.onupgradeneeded = () => {
           const db = dbOpenRequest.result;
-          db.createObjectStore(objectStoreName);
+          db.createObjectStore(objectStoreName, {keyPath: cacheKeyPath});
         };
       } else {
         resolve(null);
@@ -45,23 +45,29 @@ export default class IndexDbLoader<Key extends IDBValidKey, DbValue, Value> {
     });
   }
 
-  get = async (key: Key): Promise<Value | undefined> => {
+  clear = async (): Promise<void> => {
     const repo = await this.repoPromise;
     if (!repo) return undefined;
-    return await repo?.findById(key);
+    await repo.deleteAll();
   };
 
-  invalidate = async (key: Key): Promise<void> => {
+  get = async (cacheKey: Key): Promise<Value | undefined> => {
+    const repo = await this.repoPromise;
+    if (!repo) return undefined;
+    return await repo?.findById(cacheKey);
+  };
+
+  invalidate = async (cacheKey: Key): Promise<void> => {
     const repo = await this.repoPromise;
     if (!repo) return;
-    await repo?.deleteById(key);
+    await repo?.deleteById(cacheKey);
   };
 
-  store = async (key: Key, value: Value | undefined): Promise<void> => {
+  store = async (cacheKey: Key, value: Value | undefined): Promise<void> => {
     const repo = await this.repoPromise;
     if (!repo) return;
     if (value === undefined) {
-      await repo?.deleteById(key);
+      await repo?.deleteById(cacheKey);
     } else {
       await repo.save(value);
     }

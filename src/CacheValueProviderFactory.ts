@@ -1,22 +1,22 @@
 import React from 'react';
 
 import Cache from './Cache';
-import useCacheValueFactory from './useCacheValueFactory';
+import cacheValueHookFactory from './cacheValueHookFactory';
 
-interface Props<Value, Result> {
+export interface CacheValueProviderProps<Value, Result> {
   children: (value: (Value | undefined)) => Result;
-  key: string;
+  cacheKey: string;
 }
 
-export default function CacheValueProviderFactory<Value> (cache: Cache<Value>) {
-  const useCacheValue = useCacheValueFactory(cache);
+export default function cacheValueProviderFactory<Value> (cache: Cache<Value>) {
+  const useCacheValue = cacheValueHookFactory(cache);
 
   function CacheValueProvider<Result> ({
-    children, key,
-  }: Props<Value, Result>): Result {
-    const value = useCacheValue(key);
+    children, cacheKey,
+  }: CacheValueProviderProps<Value, Result>): Result {
+    const value = useCacheValue(cacheKey);
     return children(value);
   }
 
-  return React.memo(CacheValueProvider);
+  return React.memo(CacheValueProvider) as typeof CacheValueProvider;
 }

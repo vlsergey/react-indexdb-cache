@@ -1,33 +1,42 @@
 
 export default class ChainedDataLoader<K, V> {
 
-  private readonly currentGet: (key: K) => Promise<V | undefined>;
-  private readonly currentSet?: ((key: K, value: V | undefined) => unknown) | undefined;
-  private readonly isGood: (key: K, value: V) => boolean;
+  private readonly currentClear?: () => Promise<void>;
+  private readonly currentGet: (cacheKey: K) => Promise<V | undefined>;
+  private readonly currentSet?: ((cacheKey: K, value: V | undefined) => unknown) | undefined;
+  private readonly isGood: (cacheKey: K, value: V) => boolean;
   private readonly next?: ChainedDataLoader<K, V>;
 
   constructor (
-    currentGet: (key: K) => Promise<V | undefined>,
-    currentSet: ((key: K, value: V | undefined) => unknown) | undefined = undefined,
-    next: ChainedDataLoader<K, V> | undefined = undefined,
-    isGood: (key: K, value: V) => boolean = () => true
+    currentGet: (cacheKey: K) => Promise<V | undefined>,
+
+    isGood?: (cacheKey: K, value: V) => boolean,
+    currentClear?: (() => Promise<void>) | undefined,
+    currentSet?: ((cacheKey: K, value: V | undefined) => unknown),
+    next?: ChainedDataLoader<K, V> | undefined
   ) {
+    this.currentClear = currentClear;
     this.currentGet = currentGet;
     this.currentSet = currentSet;
-    this.isGood = isGood;
+    this.isGood = isGood || (() => true);
     this.next = next;
   }
 
-  get = async (key: K): Promise<V | undefined> => {
-    const fromCurrent = await this.currentGet(key);
-    if (fromCurrent != undefined && this.isGood(key, fromCurrent)) {
+  clear = async () => {
+    await this.currentClear?.();
+    await this.next?.clear();
+  };
+
+  get = async (cacheKey: K): Promise<V | undefined> => {
+    const fromCurrent = await this.currentGet(cacheKey);
+    if (fromCurrent != undefined && this.isGood(cacheKey, fromCurrent)) {
       return fromCurrent;
     }
 
     if (this.next) {
-      const fromNext = await this.next.get(key);
-      if (fromNext != undefined && this.isGood(key, fromNext)) {
-        this.currentSet?.(key, fromNext);
+      const fromNext = await this.next.get(cacheKey);
+      if (fromNext != undefined && this.isGood(cacheKey, fromNext)) {
+        this.currentSet?.(cacheKey, fromNext);
         return fromNext;
       }
     }
@@ -35,16 +44,16 @@ export default class ChainedDataLoader<K, V> {
     return undefined;
   };
 
-  invalidate = async (key: K) => {
-    await this.currentSet?.(key, undefined);
-    await this.next?.invalidate(key);
+  invalidate = async (cacheKey: K) => {
+    await this.currentSet?.(cacheKey, undefined);
+    await this.next?.invalidate(cacheKey);
   };
 
-  requeue = async (key: K): Promise<V | undefined> => {
+  requeue = async (cacheKey: K): Promise<V | undefined> => {
     const obtainer = this.next ? this.next.requeue : this.currentGet;
-    const value = await obtainer(key);
+    const value = await obtainer(cacheKey);
     if (this.currentSet) {
-      this.currentSet(key, value);
+      this.currentSet(cacheKey, value);
     }
     return value;
   };
