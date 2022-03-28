@@ -5,7 +5,7 @@ import cacheValueHookFactory from './cacheValueHookFactory';
 
 export interface CacheValueProviderProps<Key extends ValidCacheKey, Value, Result> {
   children: (value: (Value | undefined)) => Result;
-  cacheKey: Key;
+  cacheKey?: Key;
 }
 
 export default function cacheValueProviderFactory<Key extends ValidCacheKey, Value> (cache: Cache<Key, Value>) {
