@@ -46,6 +46,16 @@ implements Cache<Key, Value> {
     }
   };
 
+  put = (cacheKey: Key, value: Value | undefined) => {
+    if (value === undefined) {
+      delete this.memoryCache[cacheKey];
+    } else {
+      this.memoryCache[cacheKey] = value;
+    }
+    this.memoryCacheStamp++;
+    this.onChange(cacheKey, value);
+  };
+
   queue = (cacheKey: Key) => this.queueImpl(this.dataLoader.get, cacheKey);
 
   private readonly queueImpl = async (
@@ -61,14 +71,7 @@ implements Cache<Key, Value> {
     this.queuedStamp++;
     try {
       const value = await method(cacheKey);
-
-      if (value === undefined) {
-        delete this.memoryCache[cacheKey];
-      } else {
-        this.memoryCache[cacheKey] = value;
-      }
-      this.memoryCacheStamp++;
-      this.onChange(cacheKey, value);
+      this.put(cacheKey, value);
     } catch (err) {
       this.onError?.(cacheKey, err);
     } finally {
