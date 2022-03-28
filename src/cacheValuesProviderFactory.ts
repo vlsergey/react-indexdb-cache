@@ -1,19 +1,19 @@
 import React from 'react';
 
-import Cache from './Cache';
+import Cache, {ValidCacheKey} from './Cache';
 import cacheValuesHookFactory from './cacheValuesHookFactory';
 
-export interface CacheValuesProviderProps<Value, Result> {
-  children: (values: Record<string, Value>) => Result;
-  cacheKeys: readonly string[];
+export interface CacheValuesProviderProps<Key extends ValidCacheKey, Value, Result> {
+  children: (values: Record<Key, Value>) => Result;
+  cacheKeys: readonly Key[];
 }
 
-export default function cacheValueProviderFactory<Value> (cache: Cache<Value>) {
+export default function cacheValueProviderFactory<Key extends ValidCacheKey, Value> (cache: Cache<Key, Value>) {
   const useCacheValues = cacheValuesHookFactory(cache);
 
   function CacheValuesProvider<Result> ({
     children, cacheKeys,
-  }: CacheValuesProviderProps<Value, Result>): Result {
+  }: CacheValuesProviderProps<Key, Value, Result>): Result {
     const values = useCacheValues(cacheKeys);
     return children(values);
   }

@@ -1,6 +1,5 @@
-import {CacheImpl,
-  cacheValueProviderFactory,
-  cacheValuesProviderFactory} from '../src/index';
+import {cacheValueProviderFactory,
+  cacheValuesProviderFactory, CacheWithIndexedDb} from '../src/index';
 
 interface TestValue {
   cacheKey: string;
@@ -42,7 +41,7 @@ class TestLoader {
 
 const testLoader = new TestLoader();
 
-const testCache = new CacheImpl<TestValue, TestValue>({
+const testCache = new CacheWithIndexedDb<string, 'cacheKey', TestValue, TestValue>({
   loader: (cacheKey: string) => {
     console.debug(`[testCache] invoked loader for key '${cacheKey}'`);
     return testLoader.queue(cacheKey);

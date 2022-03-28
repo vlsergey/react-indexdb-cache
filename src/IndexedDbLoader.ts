@@ -3,21 +3,26 @@ import {IndexedDbRepository, IndexedDbRepositoryImpl} from '@vlsergey/react-inde
 // @ts-expect-error cheap support for some old versions of IndexedDb
 const indexedDB: IDBFactory = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 
-interface IndexDbLoaderOptions<DbValue, Value> {
+interface IndexedDbLoaderOptions<DbValue, Value> {
   objectStoreName?: string;
   prepareForDb?: (value: Value) => DbValue;
   restoreAfterDb?: (dbValue: DbValue) => Value;
 }
 
-export default class IndexDbLoader<Key extends IDBValidKey, DbValue, Value> {
+export default class IndexedDbLoader<
+  Key extends IDBValidKey,
+  KeyPath extends string,
+  DbValue extends {[s in KeyPath]: Key},
+  Value
+> {
 
   private readonly repoPromise: Promise<IndexedDbRepository<Key, Value> | null>;
 
-  constructor (databaseName: string, cacheKeyPath : (string & keyof DbValue), {
+  constructor (databaseName: string, cacheKeyPath: KeyPath, {
     prepareForDb = (value: Value) => value as unknown as DbValue,
     restoreAfterDb = (flatValue: DbValue) => flatValue as unknown as Value,
     objectStoreName = 'CACHE',
-  }: IndexDbLoaderOptions<DbValue, Value>) {
+  }: IndexedDbLoaderOptions<DbValue, Value>) {
 
     this.repoPromise = new Promise((resolve, reject) => {
       if (indexedDB) {

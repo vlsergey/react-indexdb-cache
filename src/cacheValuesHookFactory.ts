@@ -1,15 +1,17 @@
 import {useEffect, useMemo, useState} from 'react';
 
-import Cache, {CacheListener} from './Cache';
+import Cache, {CacheListener, ValidCacheKey} from './Cache';
 
-export default function cacheValuesHookFactory<Value> (cache: Cache<Value>) : ((cacheKeys: readonly string[]) => Record<string, Value>) {
+export default function cacheValuesHookFactory<Key extends ValidCacheKey, Value> (
+    cache: Cache<Key, Value>
+) : ((cacheKeys: readonly Key[]) => Record<Key, Value>) {
 
-  function useCacheValues (cacheKeys: readonly string[]): Record<string, Value> {
-    const setOfKeys = useMemo(() => new Set<string>(cacheKeys), [cacheKeys]);
+  function useCacheValues (cacheKeys: readonly Key[]): Record<Key, Value> {
+    const setOfKeys = useMemo(() => new Set<Key>(cacheKeys), [cacheKeys]);
     const [, setCounter] = useState<number>(0);
 
     useEffect(() => {
-      const listener: CacheListener<Value> = cacheKey => {
+      const listener: CacheListener<Key, Value> = cacheKey => {
         if (setOfKeys.has(cacheKey)) {
           setCounter(c => c + 1);
         }

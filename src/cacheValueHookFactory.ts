@@ -1,14 +1,16 @@
 import {useEffect, useState} from 'react';
 
-import Cache, {CacheListener} from './Cache';
+import Cache, {CacheListener, ValidCacheKey} from './Cache';
 
-export default function cacheValueHookFactory<Value> (cache: Cache<Value>) : ((cacheKey: string) => Value | undefined) {
+export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> (
+    cache: Cache<Key, Value>
+) : ((cacheKey: Key) => Value | undefined) {
 
-  function useCacheValue (cacheKey: string): Value | undefined {
+  function useCacheValue (cacheKey: Key): Value | undefined {
     const [, setCounter] = useState<number>(0);
 
     useEffect(() => {
-      const listener: CacheListener<Value> = cacheKeyOfChangedItem => {
+      const listener: CacheListener<Key, Value> = cacheKeyOfChangedItem => {
         if (cacheKey === cacheKeyOfChangedItem) {
           setCounter(c => c + 1);
         }

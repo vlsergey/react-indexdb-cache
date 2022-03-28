@@ -1,19 +1,24 @@
 import Cache, {CacheListener} from './Cache';
-import CacheImpl, {CacheOptions} from './CacheImpl';
 import cacheValueHookFactory from './cacheValueHookFactory';
 import cacheValueProviderFactory, {CacheValueProviderProps} from './cacheValueProviderFactory';
 import cacheValuesHookFactory from './cacheValuesHookFactory';
 import cacheValuesProviderFactory, {CacheValuesProviderProps} from './cacheValuesProviderFactory';
+import CacheWithIndexedDb, {CacheWithIndexedDbOptions, ValidIndexedDbCacheKey} from './CacheWithIndexedDb';
+import MemoryOnlyCache, {MemoryOnlyCacheOptions, ValidMemoryOnlyCacheKey} from './MemoryOnlyCache';
 
 export {
   Cache,
-  CacheImpl,
   CacheListener,
-  CacheOptions,
+  CacheWithIndexedDb,
+  CacheWithIndexedDbOptions,
   cacheValueHookFactory,
   cacheValuesHookFactory,
   cacheValueProviderFactory,
   CacheValueProviderProps,
   cacheValuesProviderFactory,
   CacheValuesProviderProps,
+  MemoryOnlyCache,
+  MemoryOnlyCacheOptions,
+  ValidIndexedDbCacheKey,
+  ValidMemoryOnlyCacheKey,
 };

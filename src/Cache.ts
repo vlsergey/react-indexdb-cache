@@ -1,26 +1,28 @@
 
-export type CacheListener<Value> = (cacheKey: string, value: Value | undefined) => unknown;
+export type ValidCacheKey = string | number | symbol;
 
-export default interface Cache< Value> {
+export type CacheListener<Key, Value> = (cacheKey: Key, value: Value | undefined) => unknown;
+
+export default interface Cache<Key extends ValidCacheKey, Value> {
 
   clear: () => Promise<void>;
 
-  memoryCache: Record<string, Value>;
+  memoryCache: Readonly< Record<Key, Value>>;
 
   memoryCacheStamp: number;
 
-  invalidate: (cacheKey: string) => unknown;
+  invalidate: (cacheKey: Key) => unknown;
 
-  queue: (cacheKey: string) => unknown;
+  queue: (cacheKey: Key) => unknown;
 
-  queued: Readonly< Set<string>>;
+  queued: Readonly<Set<Key>>;
 
   queuedStamp: number;
 
-  registerListener: (listener: CacheListener<Value>) => unknown;
+  registerListener: (listener: CacheListener<Key, Value>) => unknown;
 
-  requeue: (cacheKey: string) => unknown;
+  requeue: (cacheKey: Key) => unknown;
 
-  unregisterListener: (listener: CacheListener<Value>) => unknown;
+  unregisterListener: (listener: CacheListener<Key, Value>) => unknown;
 
 }
