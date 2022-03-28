@@ -4,7 +4,7 @@ import Cache, {CacheListener, ValidCacheKey} from './Cache';
 
 export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> (
     cache: Cache<Key, Value>
-) : ((cacheKey: Key) => Value | undefined) {
+) {
 
   function useCacheValue (cacheKey: Key | undefined): Value | undefined {
     const [, setCounter] = useState<number>(0);
