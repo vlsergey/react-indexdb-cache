@@ -19,7 +19,7 @@ export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> 
       return () => {
         cache.unregisterListener(listener);
       };
-    });
+    }, [cacheKey]);
 
     useEffect(() => {
       if (cacheKey !== undefined && cache.memoryCache[cacheKey] === undefined && !cache.queued.has(cacheKey)) {
