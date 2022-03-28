@@ -19,6 +19,17 @@ describe('CacheValuesProvider', () => {
     await testCache.clear();
   });
 
+  it('Can be compiled with array result (from map function)', () => {
+    const rendered = ReactTestUtils.renderIntoDocument<Wrapper<unknown>>(<Wrapper>
+      <TestCacheValuesProvider cacheKeys={cacheKeys}>
+        { (values: Record<string, TestValue>) => Object.entries(values).map(([key, value]) =>
+          <span key={key}><span>{key}</span><span>{value?.value}</span></span>
+        ) }
+      </TestCacheValuesProvider>
+    </Wrapper>) as Wrapper<unknown>;
+    assert.ok(rendered);
+  });
+
   const cacheKeys = ['first', 'second'] as const;
   it('returns undefined until value is received', async () => {
 

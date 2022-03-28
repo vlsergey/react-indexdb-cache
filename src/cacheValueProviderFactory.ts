@@ -13,9 +13,9 @@ export default function cacheValueProviderFactory<Key extends ValidCacheKey, Val
 
   function CacheValueProvider<Result> ({
     children, cacheKey,
-  }: CacheValueProviderProps<Key, Value, Result>): Result {
+  }: CacheValueProviderProps<Key, Value, Result>): Result & JSX.Element {
     const value = useCacheValue(cacheKey);
-    return children(value);
+    return children(value) as unknown as (Result & JSX.Element);
   }
 
   return React.memo(CacheValueProvider) as typeof CacheValueProvider;
