@@ -6,7 +6,7 @@ export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> 
     cache: Cache<Key, Value>
 ) : ((cacheKey: Key) => Value | undefined) {
 
-  function useCacheValue (cacheKey: Key): Value | undefined {
+  function useCacheValue (cacheKey: Key | undefined): Value | undefined {
     const [, setCounter] = useState<number>(0);
 
     useEffect(() => {
@@ -22,13 +22,13 @@ export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> 
     });
 
     useEffect(() => {
-      if (cache.memoryCache[cacheKey] === undefined && !cache.queued.has(cacheKey)) {
+      if (cacheKey !== undefined && cache.memoryCache[cacheKey] === undefined && !cache.queued.has(cacheKey)) {
         cache.queue(cacheKey);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cache.memoryCacheStamp, cache.queuedStamp, cacheKey]);
 
-    return cache.memoryCache[cacheKey];
+    return cacheKey !== undefined ? cache.memoryCache[cacheKey] : undefined;
   }
 
   return useCacheValue;
