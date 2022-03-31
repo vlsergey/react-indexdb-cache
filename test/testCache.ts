@@ -41,13 +41,12 @@ class TestLoader {
 
 const testLoader = new TestLoader();
 
-const testCache = new CacheWithIndexedDb<string, 'cacheKey', TestValue, TestValue>({
+const testCache = new CacheWithIndexedDb<string, TestValue, TestValue>({
   loader: (cacheKey: string) => {
     console.debug(`[testCache] invoked loader for key '${cacheKey}'`);
     return testLoader.queue(cacheKey);
   },
   databaseName: 'testDatabase',
-  cacheKeyPath: 'cacheKey'
 });
 
 const TestCacheValueProvider = cacheValueProviderFactory(testCache);

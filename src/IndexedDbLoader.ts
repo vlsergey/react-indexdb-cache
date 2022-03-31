@@ -1,4 +1,4 @@
-import {IndexedDbRepository, IndexedDbRepositoryImpl} from '@vlsergey/react-indexdb-repo';
+import {OutOfLineKeyIndexedDbRepository, OutOfLineKeyIndexedDbRepositoryImpl} from '@vlsergey/react-indexdb-repo';
 
 // @ts-expect-error cheap support for some old versions of IndexedDb
 const indexedDB: IDBFactory = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
@@ -11,14 +11,13 @@ interface IndexedDbLoaderOptions<DbValue, Value> {
 
 export default class IndexedDbLoader<
   Key extends IDBValidKey,
-  KeyPath extends string,
-  DbValue extends {[s in KeyPath]: Key},
+  DbValue,
   Value
 > {
 
-  private readonly repoPromise: Promise<IndexedDbRepository<Key, Value> | null>;
+  private readonly repoPromise: Promise<OutOfLineKeyIndexedDbRepository<Key, Value> | null>;
 
-  constructor (databaseName: string, cacheKeyPath: KeyPath, {
+  constructor (databaseName: string, {
     prepareForDb = (value: Value) => value as unknown as DbValue,
     restoreAfterDb = (flatValue: DbValue) => flatValue as unknown as Value,
     objectStoreName = 'CACHE',
@@ -35,14 +34,14 @@ export default class IndexedDbLoader<
         dbOpenRequest.onsuccess = () => {
           console.debug(`Successfully open indexedDB connection for database '${databaseName}'`);
 
-          const repo = new IndexedDbRepositoryImpl<Key, DbValue, Value>(dbOpenRequest.result, objectStoreName, cacheKeyPath);
+          const repo = new OutOfLineKeyIndexedDbRepositoryImpl<Key, DbValue, Value>(dbOpenRequest.result, objectStoreName);
           repo.transformAfterIndexDb = restoreAfterDb;
           repo.transformBeforeIndexDb = prepareForDb;
           resolve(repo);
         };
         dbOpenRequest.onupgradeneeded = () => {
           const db = dbOpenRequest.result;
-          db.createObjectStore(objectStoreName, {keyPath: cacheKeyPath});
+          db.createObjectStore(objectStoreName);
         };
       } else {
         resolve(null);
@@ -74,7 +73,7 @@ export default class IndexedDbLoader<
     if (value === undefined) {
       await repo?.deleteById(cacheKey);
     } else {
-      await repo.save(value);
+      await repo.save(cacheKey, value);
     }
   };
 

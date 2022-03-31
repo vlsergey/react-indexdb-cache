@@ -6,13 +6,11 @@ export type ValidIndexedDbCacheKey = IDBValidKey & ValidCacheKey;
 
 export interface CacheWithIndexedDbOptions<
   Key extends ValidIndexedDbCacheKey,
-  KeyPath extends string,
-  DbValue extends {[s in KeyPath]: Key},
+  DbValue,
   Value
 > {
   loader: (cacheKey: Key) => Promise<Value | undefined>;
   databaseName: string;
-  cacheKeyPath: KeyPath;
   objectStoreName?: string;
   prepareForDb?: (value: Value) => DbValue;
   restoreAfterDb?: (dbValue: DbValue) => Value;
@@ -21,8 +19,7 @@ export interface CacheWithIndexedDbOptions<
 
 export default class CacheWithIndexedDb<
   Key extends ValidIndexedDbCacheKey,
-  KeyPath extends string,
-  DbValue extends {[s in KeyPath]: Key},
+  DbValue,
   Value
 > implements Cache<Key, Value> {
 
@@ -38,9 +35,9 @@ export default class CacheWithIndexedDb<
   public readonly queued: Set<Key> = new Set();
   public queuedStamp = 0;
 
-  constructor (options: CacheWithIndexedDbOptions<Key, KeyPath, DbValue, Value>) {
-    const indexedDbLoader = new IndexedDbLoader<Key, KeyPath, DbValue, Value>(
-      options.databaseName, options.cacheKeyPath, options);
+  constructor (options: CacheWithIndexedDbOptions<Key, DbValue, Value>) {
+    const indexedDbLoader = new IndexedDbLoader<Key, DbValue, Value>(
+      options.databaseName, options);
 
     this.dataLoader = new ChainedDataLoader(
       indexedDbLoader.get,
