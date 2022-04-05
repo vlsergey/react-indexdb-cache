@@ -14,7 +14,7 @@ export interface CacheWithIndexedDbOptions<
   objectStoreName?: string;
   prepareForDb?: (value: Value) => DbValue;
   restoreAfterDb?: (dbValue: DbValue) => Value;
-  onDbLoad?: (cacheKey: Key, dbValue : Value) => unknown;
+  onDbLoad?: (cacheKey: Key, dbValue: Value) => unknown;
   onError?: (cacheKey: Key, error: unknown) => unknown;
 }
 
@@ -40,13 +40,13 @@ export default class CacheWithIndexedDb<
     const indexedDbLoader = new IndexedDbLoader<Key, DbValue, Value>(
       options.databaseName, options);
 
-    const onDbLoad : ((cacheKey: Key, value : Value) => unknown) | undefined = options.onDbLoad;
+    const onDbLoad: ((cacheKey: Key, value: Value) => unknown) | undefined = options.onDbLoad;
 
-    const getImpl = async (cacheKey: Key) : Promise<Value | undefined> => {
+    const getImpl = async (cacheKey: Key): Promise<Value | undefined> => {
       const result = (await indexedDbLoader.get(cacheKey)) as Value;
       onDbLoad?.(cacheKey, result);
       return result;
-    }
+    };
 
     this.dataLoader = new ChainedDataLoader(
       getImpl,

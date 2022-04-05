@@ -1,5 +1,6 @@
 
-export type ValidCacheKey = string | number | symbol;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ValidCacheKey = keyof any;
 
 export type CacheListener<Key, Value> = (cacheKey: Key, value: Value | undefined) => unknown;
 

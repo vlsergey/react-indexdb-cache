@@ -8,17 +8,38 @@ export default function cacheValuesHookFactory<Key extends ValidCacheKey, Value>
 
   function useCacheValues (cacheKeys: readonly Key[]): Record<Key, Value> {
     const setOfKeys = useMemo(() => new Set<Key>(cacheKeys), [cacheKeys]);
-    const [, setCounter] = useState<number>(0);
+    const [result, setResult] = useState<Record<Key, Value>>(() => {
+      const initial = {} as Record<Key, Value>;
+      for (const key of cacheKeys) {
+        const value = cache.memoryCache[key];
+        if (value !== undefined) {
+          initial[key] = value;
+        }
+      }
+      return initial;
+    });
 
     useEffect(() => {
-      const listener: CacheListener<Key, Value> = cacheKey => {
+      const listener: CacheListener<Key, Value> = (cacheKey, value) => {
         if (setOfKeys.has(cacheKey)) {
-          setCounter(c => c + 1);
+          if (value === undefined) {
+            setResult(oldResult => {
+              if (oldResult[cacheKey] === value) return oldResult;
+              const newResult = {...oldResult};
+              delete newResult[cacheKey];
+              return newResult;
+            });
+          } else {
+            setResult(oldResult => {
+              if (oldResult[cacheKey] === value) return oldResult;
+              return {...oldResult, [cacheKey]: value};
+            });
+          }
         }
       };
       cache.registerListener(listener);
       return () => { cache.unregisterListener(listener); };
-    }, [setOfKeys]);
+    }, [setOfKeys, setResult]);
 
     useEffect(() => {
       for (const cacheKey of cacheKeys) {
@@ -27,9 +48,9 @@ export default function cacheValuesHookFactory<Key extends ValidCacheKey, Value>
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [cache.memoryCacheStamp, cache.queuedStamp, setOfKeys]);
+    }, [cache.memoryCacheStamp, setOfKeys]);
 
-    return cache.memoryCache;
+    return result;
   }
 
   return useCacheValues;
