@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/vlsergey/react-indexdb-cache#readme",
   "devDependencies": {
-    "@vlsergey/js-config": "^11.0.0"
+    "@vlsergey/js-config": "^11.1.0"
   },
   "nyc": {
     "sourceMap": false,
