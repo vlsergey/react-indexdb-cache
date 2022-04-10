@@ -50,7 +50,6 @@ export default function cacheValueHookFactory<Key extends ValidCacheKey, Value> 
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cacheKey]);
 
-    console.debug('useCacheValue', cacheKey, value, cacheKey !== undefined ? cache.memoryCache[cacheKey] : undefined);
     return value;
   }
 
