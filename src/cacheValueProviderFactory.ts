@@ -8,11 +8,14 @@ export interface CacheValueProviderProps<Key extends ValidCacheKey, Value, Resul
   cacheKey?: Key;
 }
 
-export default function cacheValueProviderFactory<Key extends ValidCacheKey, Value> (cache: Cache<Key, Value>) {
-  const useCacheValue = cacheValueHookFactory(cache);
+export default function cacheValueProviderFactory<Key extends ValidCacheKey, Value> (
+    cache: Cache<Key, Value>,
+    debug?: boolean
+) {
+  const useCacheValue = cacheValueHookFactory(cache, debug);
 
   function CacheValueProvider<Result> ({
-    children, cacheKey,
+    children, cacheKey
   }: CacheValueProviderProps<Key, Value, Result>): Result & JSX.Element {
     const value = useCacheValue(cacheKey);
     return children(value) as unknown as (Result & JSX.Element);

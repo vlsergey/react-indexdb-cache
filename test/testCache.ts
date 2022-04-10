@@ -44,7 +44,7 @@ const testCache = new CacheWithIndexedDb<string, number, number>({
   databaseName: 'testDatabase',
 });
 
-const TestCacheValueProvider = cacheValueProviderFactory(testCache);
+const TestCacheValueProvider = cacheValueProviderFactory(testCache, true);
 const TestCacheValuesProvider = cacheValuesProviderFactory(testCache);
 
 export {

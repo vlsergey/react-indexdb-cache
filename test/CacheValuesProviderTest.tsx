@@ -3,15 +3,9 @@ import React from 'react';
 import ReactTestUtils from 'react-dom/test-utils';
 
 import {testCache, TestCacheValuesProvider, testLoader} from './testCache';
+import Wrapper from './Wrapper';
 
 const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-class Wrapper<Result> extends React.PureComponent<{children: Result}> {
-  override render () {
-    console.debug('[Wrapper] is rendered for ', this.props.children);
-    return this.props.children;
-  }
-}
 
 describe('CacheValuesProvider', () => {
 
