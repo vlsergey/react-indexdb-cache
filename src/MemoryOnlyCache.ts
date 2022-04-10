@@ -1,4 +1,4 @@
-import Cache, {CacheListener} from './Cache';
+import BaseCache from './BaseCache';
 import ChainedDataLoader from './ChainedDataLoader';
 
 export type ValidMemoryOnlyCacheKey = string | number | symbol;
@@ -9,21 +9,17 @@ export interface MemoryOnlyCacheOptions<Key extends ValidMemoryOnlyCacheKey, Val
 }
 
 export default class MemoryOnlyCache<Key extends ValidMemoryOnlyCacheKey, Value>
-implements Cache<Key, Value> {
+  extends BaseCache<Key, Value> {
 
   private readonly dataLoader: ChainedDataLoader<Key, Value>;
 
   private readonly onError?: (cacheKey: Key, error: unknown) => unknown;
 
-  public memoryCache = {} as Record<Key, Value>;
-  public memoryCacheStamp = 0;
-
-  private readonly listeners: Set<CacheListener<Key, Value>> = new Set();
-
   public readonly queued: Set<Key> = new Set();
   public queuedStamp = 0;
 
   constructor (options: MemoryOnlyCacheOptions<Key, Value>) {
+    super();
     this.dataLoader = new ChainedDataLoader(options.loader);
     this.onError = options.onError;
   }
@@ -38,22 +34,6 @@ implements Cache<Key, Value> {
     this.memoryCacheStamp++;
     await this.dataLoader.invalidate(cacheKey);
     this.onChange(cacheKey, undefined);
-  };
-
-  private readonly onChange = (cacheKey: Key, value: Value | undefined) => {
-    for (const listener of this.listeners) {
-      listener(cacheKey, value);
-    }
-  };
-
-  put = (cacheKey: Key, value: Value | undefined) => {
-    if (value === undefined) {
-      delete this.memoryCache[cacheKey];
-    } else {
-      this.memoryCache[cacheKey] = value;
-    }
-    this.memoryCacheStamp++;
-    this.onChange(cacheKey, value);
   };
 
   queue = (cacheKey: Key) => this.queueImpl(this.dataLoader.get, cacheKey);
@@ -71,7 +51,7 @@ implements Cache<Key, Value> {
     this.queuedStamp++;
     try {
       const value = await method(cacheKey);
-      this.put(cacheKey, value);
+      this.putToMemoryCache(cacheKey, value);
     } catch (err) {
       this.onError?.(cacheKey, err);
     } finally {
@@ -80,10 +60,6 @@ implements Cache<Key, Value> {
     }
   };
 
-  registerListener = (listener: CacheListener<Key, Value>) => this.listeners.add(listener);
-
   requeue = (cacheKey: Key) => this.queueImpl(this.dataLoader.requeue, cacheKey);
-
-  unregisterListener = (listener: CacheListener<Key, Value>) => this.listeners.delete(listener);
 
 }

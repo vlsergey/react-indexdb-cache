@@ -20,6 +20,8 @@ export default interface Cache<Key extends ValidCacheKey, Value> {
 
   queuedStamp: number;
 
+  putToMemoryCache: (cacheKey: Key, value: Value | undefined) => unknown;
+
   registerListener: (listener: CacheListener<Key, Value>) => unknown;
 
   requeue: (cacheKey: Key) => unknown;

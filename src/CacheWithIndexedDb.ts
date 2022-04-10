@@ -1,4 +1,5 @@
-import Cache, {CacheListener, ValidCacheKey} from './Cache';
+import BaseCache from './BaseCache';
+import {ValidCacheKey} from './Cache';
 import ChainedDataLoader from './ChainedDataLoader';
 import IndexedDbLoader from './IndexedDbLoader';
 
@@ -22,21 +23,18 @@ export default class CacheWithIndexedDb<
   Key extends ValidIndexedDbCacheKey,
   DbValue,
   Value
-> implements Cache<Key, Value> {
+> extends BaseCache<Key, Value> {
 
   private readonly dataLoader: ChainedDataLoader<Key, Value>;
 
   private readonly onError?: (cacheKey: Key, error: unknown) => unknown;
 
-  public memoryCache = {} as Record<Key, Value>;
-  public memoryCacheStamp = 0;
-
-  private readonly listeners: Set<CacheListener<Key, Value>> = new Set();
-
   public readonly queued: Set<Key> = new Set();
   public queuedStamp = 0;
 
   constructor (options: CacheWithIndexedDbOptions<Key, DbValue, Value>) {
+    super();
+
     const indexedDbLoader = new IndexedDbLoader<Key, DbValue, Value>(
       options.databaseName, options);
 
@@ -71,12 +69,6 @@ export default class CacheWithIndexedDb<
     this.onChange(cacheKey, undefined);
   };
 
-  private readonly onChange = (cacheKey: Key, value: Value | undefined) => {
-    for (const listener of this.listeners) {
-      listener(cacheKey, value);
-    }
-  };
-
   queue = (cacheKey: Key) => this.queueImpl(this.dataLoader.get, cacheKey);
 
   private readonly queueImpl = async (
@@ -108,10 +100,6 @@ export default class CacheWithIndexedDb<
     }
   };
 
-  registerListener = (listener: CacheListener<Key, Value>) => this.listeners.add(listener);
-
   requeue = (cacheKey: Key) => this.queueImpl(this.dataLoader.requeue, cacheKey);
-
-  unregisterListener = (listener: CacheListener<Key, Value>) => this.listeners.delete(listener);
 
 }
