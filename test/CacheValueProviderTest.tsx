@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import React from 'react';
 import ReactTestUtils from 'react-dom/test-utils';
 
-import {testCache, TestCacheValueProvider, testLoader, TestValue} from './testCache';
+import {testCache, TestCacheValueProvider, testLoader} from './testCache';
 
 const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -23,7 +23,7 @@ describe('CacheValueProvider', () => {
 
     const rendered = ReactTestUtils.renderIntoDocument<Wrapper<unknown>>(<Wrapper>
       <TestCacheValueProvider cacheKey="testKey">
-        { (value: TestValue | undefined) => <span className="value">{value?.value || ''}</span> }
+        { (value: number | undefined) => <span className="value">{value || ''}</span> }
       </TestCacheValueProvider>
     </Wrapper>) as Wrapper<unknown>;
     assert.ok(rendered);
@@ -31,14 +31,25 @@ describe('CacheValueProvider', () => {
 
     await testLoader.waitForResolveToBeRegistered('testKey');
 
-    testLoader.queueResolve.testKey!({
-      cacheKey: 'testKey',
-      value: 42,
-    });
+    testLoader.queueResolve.testKey!(42);
     await sleep(0);
 
     assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'value').textContent, '42');
 
+  });
+
+  it('Calling putToMemoryCache will immediatly result in rerender', () => {
+    const rendered = ReactTestUtils.renderIntoDocument<Wrapper<unknown>>(<Wrapper>
+      <TestCacheValueProvider cacheKey="testKey">
+        { value => <span className="value">{value || ''}</span> }
+      </TestCacheValueProvider>
+    </Wrapper>) as Wrapper<unknown>;
+    assert.ok(rendered);
+    assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'value').textContent, '');
+
+    testCache.putToMemoryCache('testKey', 42);
+
+    assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'value').textContent, '42');
   });
 
 });

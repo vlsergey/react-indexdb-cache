@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import React from 'react';
 import ReactTestUtils from 'react-dom/test-utils';
 
-import {testCache, TestCacheValuesProvider, testLoader, TestValue} from './testCache';
+import {testCache, TestCacheValuesProvider, testLoader} from './testCache';
 
 const sleep = async (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -22,8 +22,8 @@ describe('CacheValuesProvider', () => {
   it('Can be compiled with array result (from map function)', () => {
     const rendered = ReactTestUtils.renderIntoDocument<Wrapper<unknown>>(<Wrapper>
       <TestCacheValuesProvider cacheKeys={cacheKeys}>
-        { (values: Record<string, TestValue>) => Object.entries(values).map(([key, value]) =>
-          <span key={key}><span>{key}</span><span>{value?.value}</span></span>
+        { (values: Record<string, number>) => Object.entries(values).map(([key, value]) =>
+          <span key={key}><span>{key}</span><span>{value || ''}</span></span>
         ) }
       </TestCacheValuesProvider>
     </Wrapper>) as Wrapper<unknown>;
@@ -35,9 +35,9 @@ describe('CacheValuesProvider', () => {
 
     const rendered = ReactTestUtils.renderIntoDocument<Wrapper<unknown>>(<Wrapper>
       <TestCacheValuesProvider cacheKeys={cacheKeys}>
-        { (values: Record<string, TestValue>) => <>
-          <span className="valueFirst">{values.first?.value || ''}</span>
-          <span className="valueSecond">{values.second?.value || ''}</span>
+        { (values: Record<string, number>) => <>
+          <span className="valueFirst">{values.first || ''}</span>
+          <span className="valueSecond">{values.second || ''}</span>
         </> }
       </TestCacheValuesProvider>
     </Wrapper>) as Wrapper<unknown>;
@@ -47,12 +47,12 @@ describe('CacheValuesProvider', () => {
 
     await testLoader.waitForResolveToBeRegistered('first', 'second');
 
-    testLoader.queueResolve.first!({cacheKey: 'first', value: 42});
+    testLoader.queueResolve.first!(42);
     await sleep(0);
     assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'valueFirst').textContent, '42');
     assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'valueSecond').textContent, '');
 
-    testLoader.queueResolve.second!({cacheKey: 'second', value: 84});
+    testLoader.queueResolve.second!(84);
     await sleep(0);
     assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'valueFirst').textContent, '42');
     assert.equal(ReactTestUtils.findRenderedDOMComponentWithClass(rendered, 'valueSecond').textContent, '84');

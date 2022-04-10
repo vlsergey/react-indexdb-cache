@@ -1,14 +1,9 @@
 import {cacheValueProviderFactory,
   cacheValuesProviderFactory, CacheWithIndexedDb} from '../src/index';
 
-interface TestValue {
-  cacheKey: string;
-  value: number;
-}
-
 class TestLoader {
 
-  queue = (key: string) => new Promise<TestValue | undefined>(resolve => {
+  queue = (key: string) => new Promise<number | undefined>(resolve => {
     console.debug('[TestLoader] registering resolve for key', key);
     this.queueResolve[key] = resolve;
 
@@ -27,7 +22,7 @@ class TestLoader {
 
   private queueChangePromiseResolve?: (value: unknown) => void;
 
-  queueResolve: Record<string, (value: TestValue | undefined | PromiseLike<TestValue | undefined>) => void> = {};
+  queueResolve: Record<string, (value: number | undefined | PromiseLike<number | undefined>) => void> = {};
 
   waitForResolveToBeRegistered = async (...keys: string[]) => {
     while (keys.some(key => this.queueResolve[key] === undefined)) {
@@ -41,7 +36,7 @@ class TestLoader {
 
 const testLoader = new TestLoader();
 
-const testCache = new CacheWithIndexedDb<string, TestValue, TestValue>({
+const testCache = new CacheWithIndexedDb<string, number, number>({
   loader: (cacheKey: string) => {
     console.debug(`[testCache] invoked loader for key '${cacheKey}'`);
     return testLoader.queue(cacheKey);
@@ -58,5 +53,4 @@ export {
   TestLoader,
   TestCacheValueProvider,
   TestCacheValuesProvider,
-  TestValue,
 };
